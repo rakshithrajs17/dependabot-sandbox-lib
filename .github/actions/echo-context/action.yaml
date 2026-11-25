@@ -1,0 +1,36 @@
+name: echo-context
+description: Prints job/action context so the $/ resolution can be inspected.
+inputs:
+  label:
+    description: Label to print
+    required: false
+    default: default
+outputs:
+  action_path:
+    description: Resolved path of this action
+    value: ${{ steps.info.outputs.action_path }}
+runs:
+  using: composite
+  steps:
+    - name: Print context
+      id: info
+      shell: bash
+      env:
+        LABEL: ${{ inputs.label }}
+        WORKFLOW_REF: ${{ github.workflow_ref }}
+        WORKFLOW_SHA: ${{ github.workflow_sha }}
+        EVENT_SHA: ${{ github.sha }}
+        ACTION_REPOSITORY: ${{ github.action_repository }}
+        ACTION_REF: ${{ github.action_ref }}
+      run: |
+        set -euo pipefail
+        echo "label=${LABEL}"
+        echo "repository=${GITHUB_REPOSITORY}"
+        echo "event_sha=${EVENT_SHA}"
+        echo "workflow_ref=${WORKFLOW_REF}"
+        echo "workflow_sha=${WORKFLOW_SHA}"
+        echo "action_repository=${ACTION_REPOSITORY}"
+        echo "action_ref=${ACTION_REF}"
+        echo "action_path=${GITHUB_ACTION_PATH}"
+        echo "marker=$(cat "${GITHUB_ACTION_PATH}/marker.txt")"
+        echo "action_path=${GITHUB_ACTION_PATH}" >> "$GITHUB_OUTPUT"

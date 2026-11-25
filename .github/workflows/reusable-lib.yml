@@ -1,0 +1,36 @@
+name: reusable-lib
+
+on:
+  workflow_call:
+    inputs:
+      label:
+        description: Label passed by the caller
+        required: false
+        type: string
+        default: cross-repo
+
+permissions:
+  contents: read
+
+jobs:
+  lib-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Called-workflow context
+        shell: bash
+        env:
+          GITHUB_WORKFLOW_REF: ${{ github.workflow_ref }}
+          JOB_WORKFLOW_REF: ${{ job.workflow_ref }}
+          JOB_WORKFLOW_SHA: ${{ job.workflow_sha }}
+          CALLER_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          echo "caller_repository=${CALLER_REPOSITORY}"
+          echo "github.workflow_ref=${GITHUB_WORKFLOW_REF}"
+          echo "job.workflow_ref=${JOB_WORKFLOW_REF}"
+          echo "job.workflow_sha=${JOB_WORKFLOW_SHA}"
+
+      - name: Same-repo action from a cross-repo called reusable workflow
+        uses: $/.github/actions/echo-context
+        with:
+          label: ${{ inputs.label }}
